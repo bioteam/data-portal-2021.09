@@ -79,7 +79,7 @@ class ProjectSubmission extends React.Component {
         }
         return null;
       }
-      return <MyDataModelGraph project={this.props.project} />;
+      // return <MyDataModelGraph project={this.props.project} />;
     };
 
     const displaySubmissionUIComponents = (project, userAuthMapping) => {
@@ -106,11 +106,11 @@ class ProjectSubmission extends React.Component {
       <div className='project-submission'>
         <h2 className='project-submission__title'>{this.props.project}</h2>
         {
-          <Link
-            className='project-submission__link'
-            to={`/${this.props.project}/search`}
-          >browse nodes
-          </Link>
+          // <Link
+          //   className='project-submission__link'
+          //   to={`/${this.props.project}/search`}
+          // >browse nodes
+          // </Link>
         }
         { displaySubmissionUIComponents(this.props.project, this.props.userAuthMapping) }
         { displayData() }

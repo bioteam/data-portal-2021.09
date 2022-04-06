@@ -47,7 +47,7 @@ class Explorer extends React.Component {
     /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
     const tabFragment = (
       <React.Fragment>
-        <div className='g3-accessibility-links' aria-describedby='g3-accessibility-links-tooltip-explorer'>
+        {/* <div className='g3-accessibility-links' aria-describedby='g3-accessibility-links-tooltip-explorer'>
           <Tooltip
             placement='left'
             overlay={tooltipText}
@@ -64,7 +64,7 @@ class Explorer extends React.Component {
           <a className='g3-accessibility-nav-link g3-ring-on-focus' href='#guppy-explorer-data-tools'><span>Data Tools</span></a> |
           <a className='g3-accessibility-nav-link g3-ring-on-focus' href='#guppy-explorer-summary-statistics'><span>Summary Statistics</span></a> |
           <a className='g3-accessibility-nav-link g3-ring-on-focus' href='#guppy-explorer-table-of-records'><span>Table of Records</span></a>
-        </div>
+        </div> */}
 
         <div className='guppy-explorer__tabs' id='guppy-explorer-main-tabs'>
           {explorerConfig.map((element, index) => {

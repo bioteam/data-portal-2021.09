@@ -94,7 +94,8 @@ class SubmitForm extends Component {
     const { dictionary } = this.props.submission;
     const { nodeTypes } = this.props.submission;
     const node = dictionary[this.state.chosenNode.value];
-    const options = nodeTypes.map((nodeType) => ({ value: nodeType, label: nodeType }));
+    // const options = nodeTypes.map((nodeType) => ({ value: nodeType, label: nodeType }));
+    const options = [{value: "case", label: "case"}, {value: "lab", label: "lab"}, {value: "sequence", label: "sequence"}];
 
     const updateChosenNode = (newValue) => {
       this.setState({
@@ -105,6 +106,25 @@ class SubmitForm extends Component {
 
     return (
       <div>
+        <p>
+        <span>
+            <b>Partners:</b>
+            Download the Case JSON or TSV template and enter your specimen information.<br />
+            Once all fields are completed, click on the Submit button to upload your file.<br />
+            RIPHL IDs will be provided once all cases are uploaded.<br />
+            Alternatively, you can enter each sample using the webform found on the Submit page.<br />
+          </span>
+          <span>
+            <b>CDPH staff:</b>
+            Download the CDPH JSON or TSV template and enter your specimen information.<br />
+            Once all fields are completed, click on the Submit button to upload your file.<br />
+          </span>
+          <span>
+            <b>RIPHL staff:</b>
+            Download the LAB JSON or TSV template and enter your specimen information.<br />
+            Once all fields are completed, click on the Submit button to upload your file.<br />
+          </span>
+        </p>
         <Space direction='vertical' style={{ width: '40%' }}>
           <form>
             <Space direction='vertical' style={{ width: '100%' }}>

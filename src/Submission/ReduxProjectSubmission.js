@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { connect } from 'react-redux';
 import ProjectSubmission from './ProjectSubmission';
 import SubmitTSV from './SubmitTSV';
@@ -121,47 +122,70 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
     delimiter: "\t",
     header: true
   };
-  const parsed = Papa.parse(file, parserConfig);
 
-  const submitterIsRequired = parsed.meta.fields.find(o => o === "*submitter_id");
-  const projectIsRequired = parsed.meta.fields.find(o => o === "*project_id");
 
-  const submitterFieldName = submitterIsRequired ? "*submitter_id" : "submitter_id";
-  const projectFieldName = projectIsRequired ? "*project_id" : "project_id";
-
-  const inxMap = {};
-
-  const newRows = await Promise.all(parsed.data.map(async (row) => {
-    if ( row["*type"] !== "case" ) return row;
+  try {
+    const fileParsedJSON = JSON.parse(file);
     
-    let newID = row[submitterFieldName];
-    const projID = row[projectFieldName];
+    const projID = `${program}-${project}`;
 
-    if ( !inxMap[projID] ) inxMap[projID] = 1;
+    fileParsedJSON.submitter_id = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
+      switch (status) {
+      case 200:
+        const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + 1;
 
-    if ( newID === "" ) {
-      newID = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
-        switch (status) {
-        case 200:
-          const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
-          inxMap[projID] += 1;
+        const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
 
-          const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
+        // padding
+        return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+      default:
+        return fileParsedJSON.submitter_id;
+      }
+    });
 
-          // padding
-          return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
-        default:
-          return row.submitter_id;
-        }
-      });
-    }
+    file = JSON.stringify(fileParsedJSON);
+  } catch {
+    const parsed = Papa.parse(file, parserConfig);
 
-    return {...row, [submitterFieldName]: newID};
-  }));
+    const submitterIsRequired = parsed.meta.fields.find(o => o === "*submitter_id");
+    const projectIsRequired = parsed.meta.fields.find(o => o === "*project_id");
+  
+    const submitterFieldName = submitterIsRequired ? "*submitter_id" : "submitter_id";
+    const projectFieldName = projectIsRequired ? "*project_id" : "project_id";
+  
+    const inxMap = {};
+  
+    const newRows = await Promise.all(parsed.data.map(async (row) => {
+      if ( row["*type"] !== "case" ) return row;
+      
+      let newID = row[submitterFieldName];
+      const projID = row[projectFieldName];
+  
+      if ( !inxMap[projID] ) inxMap[projID] = 1;
+  
+      if ( newID === "" ) {
+        newID = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
+          switch (status) {
+          case 200:
+            const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
+            inxMap[projID] += 1;
+  
+            const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
+  
+            // padding
+            return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+          default:
+            return row.submitter_id;
+          }
+        });
+      }
+  
+      return {...row, [submitterFieldName]: newID};
+    }));
+  
+    file = Papa.unparse(newRows, parserConfig);
+  }
 
-  alert("test");
-
-  file = Papa.unparse(newRows, parserConfig);
 
   if (!file) {
     return Promise.reject('No file to submit');

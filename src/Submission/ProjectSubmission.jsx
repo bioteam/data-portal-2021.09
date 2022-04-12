@@ -79,7 +79,7 @@ class ProjectSubmission extends React.Component {
         }
         return null;
       }
-      // return <MyDataModelGraph project={this.props.project} />;
+      return <MyDataModelGraph project={this.props.project} />;
     };
 
     const displaySubmissionUIComponents = (project, userAuthMapping) => {

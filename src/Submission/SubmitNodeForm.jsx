@@ -28,7 +28,7 @@ const SubmitNodeForm = ({
         const required = (requireds.indexOf(property) > -1);
 
         let inputComponent;
-        if (property === 'type') {
+        if (property === 'type' || property === 'submitter_id') {
           inputComponent = null;
         } else if ('enum' in node.properties[property]) {
           inputComponent = (

@@ -95,7 +95,7 @@ class SubmitForm extends Component {
     const { nodeTypes } = this.props.submission;
     const node = dictionary[this.state.chosenNode.value];
     // const options = nodeTypes.map((nodeType) => ({ value: nodeType, label: nodeType }));
-    const options = [{value: "case", label: "case"}, {value: "lab", label: "lab"}, {value: "sequence", label: "sequence"}];
+    const options = [{ value: 'case', label: 'case' }, { value: 'cdph', label: 'cdph' }, { value: 'lab', label: 'lab' }];
 
     const updateChosenNode = (newValue) => {
       this.setState({

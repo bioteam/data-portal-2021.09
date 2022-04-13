@@ -29,6 +29,7 @@ const AnyOfInput = ({
       <div className='any-of-input__sub-props'>
         <Space direction='vertical' style={{ width: '100%' }}>
           {properties.map((property) => {
+            console.log(property);
             let description = ('description' in node.properties[property]) ? node.properties[property].description : '';
             if (description === '') {
               description = ('term' in node.properties[property]) ? node.properties[property].term.description : '';
@@ -36,17 +37,25 @@ const AnyOfInput = ({
             const requiredSubprop = (requireds.indexOf(property) > -1);
             // we use index 0 of values because AnyOfInput is hardcoded
             // to be an array of length 1, an upcoming feature should be to add to this array
+            let inputComponent;
+            if (property === 'id') {
+              inputComponent = null;
+            } else {
+              inputComponent = (
+                <TextInput
+                  // each text input needs a unique id and name now
+                  id={`${name}_${property}`}
+                  key={`${name}_${property}`}
+                  name={`${name}_${property}`}
+                  value={values ? values[0][property] : ''}
+                  required={required && requiredSubprop}
+                  description={description}
+                  onChange={onChangeAnyOfWrapper}
+                />
+              );
+            }
             return (
-              <TextInput
-                // each text input needs a unique id and name now
-                id={`${name}_${property}`}
-                key={`${name}_${property}`}
-                name={`${name}_${property}`}
-                value={values ? values[0][property] : ''}
-                required={required && requiredSubprop}
-                description={description}
-                onChange={onChangeAnyOfWrapper}
-              />
+              inputComponent
             );
           })}
         </Space>

@@ -99,7 +99,7 @@ const SubmitNodeForm = ({
       })}
       <Form.Item>
         <button type='submit' value='Submit' className='button-primary-white submit-node-form__upload-form-button'>
-        Generate submission JSON from form
+        Pre-process
         </button>
       </Form.Item>
     </Form>

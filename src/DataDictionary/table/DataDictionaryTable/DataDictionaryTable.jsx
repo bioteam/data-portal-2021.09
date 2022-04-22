@@ -70,19 +70,19 @@ const DataDictionaryTable = ({
       <p>
       <span>
           <b>Partners:</b>
-          Download the Case JSON or TSV template and enter your specimen information.<br />
+          Download the Case TSV template and enter your specimen information.<br />
           Once all fields are completed, click on the Submit button to upload your file.<br />
           RIPHL IDs will be provided once all cases are uploaded.<br />
           Alternatively, you can enter each sample using the webform found on the Submit page.<br />
         </span>
         <span>
           <b>CDPH staff:</b>
-          Download the CDPH JSON or TSV template and enter your specimen information.<br />
+          Download the CDPH TSV template and enter your specimen information.<br />
           Once all fields are completed, click on the Submit button to upload your file.<br />
         </span>
         <span>
           <b>RIPHL staff:</b>
-          Download the LAB JSON or TSV template and enter your specimen information.<br />
+          Download the LAB TSV template and enter your specimen information.<br />
           Once all fields are completed, click on the Submit button to upload your file.<br />
         </span>
       </p>

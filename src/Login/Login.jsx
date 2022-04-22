@@ -127,7 +127,6 @@ class Login extends React.Component {
         (p, i) => (
           <React.Fragment key={i}>
             <div className='login-page__entries'>
-              {p.desc}
               <div className='login-page__entry-login'>
                 {
                   // If there are multiple URLs, display a dropdown next to

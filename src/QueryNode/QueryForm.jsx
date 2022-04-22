@@ -72,12 +72,6 @@ class QueryForm extends React.Component {
                 >
                   TSV
                 </Dropdown.Item>
-                <Dropdown.Item
-                  rightIcon='download'
-                  onClick={() => this.handleDownloadAll('json')}
-                >
-                  JSON
-                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           ) : null

@@ -118,74 +118,97 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
     });
   }, cache);
 
-  const parserConfig =  {
-    delimiter: "\t",
-    header: true
-  };
 
-
-  try {
-    const fileParsedJSON = JSON.parse(file);
+  // Is this a JSON submission?
+  if ( submission.file_type !== 'text/tab-separated-values' ) {
+    try {
+      const fileParsedJSON = JSON.parse(file);     
     
-    const projID = `${program}-${project}`;
+      // only for case nodes
+      if ( fileParsedJSON["type"] === "case" ) {
+      
+          const projID = `${program}-${project}`;
 
-    fileParsedJSON.submitter_id = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
-      switch (status) {
-      case 200:
-        const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + 1;
+          fileParsedJSON.submitter_id = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
+            switch (status) {
+            case 200:
+              const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + 1;
 
-        const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
+              const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
 
-        // padding
-        return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
-      default:
-        return fileParsedJSON.submitter_id;
+              // padding
+              return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+            default:
+              return fileParsedJSON.submitter_id;
+            }
+          });
+
+          file = JSON.stringify(fileParsedJSON);
       }
-    });
+    } catch(e) {
+      if ( e.message.includes("submitter_id") ) {
+        return alert('error processing case submitter_id generation: no parent projects found for case: ' + file);
+      } else {
+        return alert('error processing case submitter_id generation: ' + e.message);
+      }
+    }
+  } else {
+    const parserConfig =  {
+      delimiter: "\t",
+      header: true
+    };
 
-    file = JSON.stringify(fileParsedJSON);
-  } catch {
     const parsed = Papa.parse(file, parserConfig);
 
     const submitterIsRequired = parsed.meta.fields.find(o => o === "*submitter_id");
     const projectIsRequired = parsed.meta.fields.find(o => o === "*project_id");
-  
+    const typeIsRequired = parsed.meta.fields.find(o => o === "*type");
+
     const submitterFieldName = submitterIsRequired ? "*submitter_id" : "submitter_id";
     const projectFieldName = projectIsRequired ? "*project_id" : "project_id";
-  
+    const typeFieldName = typeIsRequired ? "*type" : "type";
+
     const inxMap = {};
   
-    const newRows = await Promise.all(parsed.data.map(async (row) => {
-      if ( row["*type"] !== "case" ) return row;
-      
-      let newID = row[submitterFieldName];
-      const projID = row[projectFieldName];
-  
-      if ( !inxMap[projID] ) inxMap[projID] = 1;
-  
-      if ( newID === "" ) {
-        newID = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
-          switch (status) {
-          case 200:
-            const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
-            inxMap[projID] += 1;
-  
-            const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
-  
-            // padding
-            return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
-          default:
-            return row.submitter_id;
-          }
-        });
+    try {
+      const newRows = await Promise.all(parsed.data.map(async (row) => {
+        // only for case nodes
+        if ( row[typeFieldName] !== "case" ) return row;
+        
+        let newID = row[submitterFieldName];
+        const projID = row[projectFieldName];
+    
+        if ( !inxMap[projID] ) inxMap[projID] = 1;
+    
+        if ( newID === "" ) {
+          newID = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
+            switch (status) {
+            case 200:
+              const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
+              inxMap[projID] += 1;
+    
+              const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
+    
+              // padding
+              return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+            default:
+              return row.submitter_id;
+            }
+          });
+        }
+    
+        return {...row, [submitterFieldName]: newID};
+      }));
+    
+      file = Papa.unparse(newRows, parserConfig);
+    } catch(e) {
+      if ( e.message.includes("submitter_id") ) {
+        return alert('error processing case submitter_id generation: no parent projects found for case');
+      } else {
+        return alert('error processing case submitter_id generation: ' + e.message);
       }
-  
-      return {...row, [submitterFieldName]: newID};
-    }));
-  
-    file = Papa.unparse(newRows, parserConfig);
+    }
   }
-
 
   if (!file) {
     return Promise.reject('No file to submit');

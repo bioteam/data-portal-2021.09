@@ -22,7 +22,7 @@ const Entity = ({
   return (
     <li>
       <span>{value.submitter_id}</span>
-      <a role='button' tabIndex={tabindexStart} className='query-node__button query-node__button--download' href={`${getSubmitPath(project)}/export?format=json&ids=${value.id}`}>Download</a>
+      <a role='button' tabIndex={tabindexStart} className='query-node__button query-node__button--download' href={`${getSubmitPath(project)}/export?format=tsv&ids=${value.id}`}>Download</a>
       <a role='button' tabIndex={tabindexStart + 1} className='query-node__button query-node__button--view' onClick={onView} onKeyPress={onView}>View</a>
       {
         showDelete ? <a role='button' tabIndex={tabindexStart + 2} className='query-node__button query-node__button--delete' onClick={onDelete} onKeyPress={onDelete}>Delete</a> : null

@@ -51,15 +51,6 @@ class DataDictionaryNode extends React.Component {
             <span className='data-dictionary-node__button-wrap'>
               <Button
                 className='data-dictionary-node__download-button'
-                onClick={(e) => { this.handleDownloadTemplate(e, 'json'); }}
-                label='JSON'
-                rightIcon='download'
-                buttonType='secondary'
-              />
-            </span>
-            <span className='data-dictionary-node__button-wrap'>
-              <Button
-                className='data-dictionary-node__download-button'
                 onClick={(e) => { this.handleDownloadTemplate(e, 'tsv'); }}
                 label='TSV'
                 rightIcon='download'

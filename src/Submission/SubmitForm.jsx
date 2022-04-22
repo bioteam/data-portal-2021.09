@@ -129,7 +129,7 @@ class SubmitForm extends Component {
           <form>
             <Space direction='vertical' style={{ width: '100%' }}>
               <Space>
-                Use Form Submission
+                Use Webform
                 <Switch className='submit-form__switch' onChange={this.onFormToggle} />
               </Space>
               {this.state.fill_form && (

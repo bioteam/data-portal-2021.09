@@ -29,7 +29,6 @@ const AnyOfInput = ({
       <div className='any-of-input__sub-props'>
         <Space direction='vertical' style={{ width: '100%' }}>
           {properties.map((property) => {
-            console.log(property);
             let description = ('description' in node.properties[property]) ? node.properties[property].description : '';
             if (description === '') {
               description = ('term' in node.properties[property]) ? node.properties[property].term.description : '';

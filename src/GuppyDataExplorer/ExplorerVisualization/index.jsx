@@ -80,7 +80,7 @@ class ExplorerVisualization extends React.Component {
       Object.keys(variants).forEach((variant) => {
         const itemData = {};
         itemData.date = date;
-        itemData[secondaryKey] = variant;
+        itemData.name = variant;
         itemData.value = variants[variant];
         mappedData.push(itemData);
       });

@@ -26,6 +26,69 @@ class ExplorerVisualization extends React.Component {
     this.connectedFilter = React.createRef();
   }
 
+  /**
+   * Aggregate and convert raw data to return counts of unique primary key / secondary key pairings
+   * for use in stacked percentage bar chart visualization
+   * @param {object} rawData
+   * @param {string} primaryKey
+   * @param {string} secondaryKey
+   * Assume raw data is of the form:
+   * [{ date: "2020-01-01", variant: "b"},
+   *  { date: "2020-01-01", variant: "b"},
+   *  { date: "2020-01-01", variant: "c"},
+   *  { date: null, variant: "c"}
+   * ]
+   * Aggregate counts by primaryKey/secondaryKey unique pairings and return:
+   * [{ date: "2020-01-01", variant: "b", count: 2},
+   *  { date: "2020-01-01", variant: "c", count: 1},
+   *  { date: "null", variant: "c", count: 1}]
+   */
+  createStackedBarData = (rawData, primaryKey, secondaryKey) => {
+    // Create a nested hashmap of data like
+    // { primaryKey: { secondaryKey: count, secondaryKey: count}}
+    // { "2020-01-01": { "b": 2, "c": 1 } }
+    const hashTable = {};
+    rawData.forEach((item) => {
+      const primaryElement = item[primaryKey];
+      const secondaryElement = item[secondaryKey];
+      // ignore rows with null secondary key
+      // PrimaryKeys can have null values, but secondaryKeys cannot
+      // e.g. if sorting by date + variant, then dates can be null but variant cannot be null
+      if (primaryElement === null) {
+        return;
+      }
+      const primaryData = hashTable[primaryElement];
+      if (primaryData === undefined) {
+        const secondaryHash = {};
+        secondaryHash[secondaryElement] = 1;
+        hashTable[primaryElement] = secondaryHash;
+      } else {
+        const singleVal = primaryData[secondaryElement];
+        if (singleVal === undefined) {
+          primaryData[secondaryElement] = 1;
+        } else {
+          primaryData[secondaryElement] = singleVal + 1;
+        }
+      }
+    });
+    console.log(hashTable)
+
+    // flatten the hash table to have a unique primaryKey/ secondaryKey pairing per row
+    const mappedData = [];
+    Object.keys(hashTable).forEach((date) => {
+      const variants = hashTable[date];
+      Object.keys(variants).forEach((variant) => {
+        const itemData = {};
+        itemData.date = date;
+        itemData[secondaryKey] = variant;
+        itemData.value = variants[variant];
+        mappedData.push(itemData);
+      });
+    });
+    console.log(mappedData)
+    return mappedData;
+  }
+
   getData = (aggsData, chartConfig, filter) => {
     const summaries = [];
     let countItems = [];
@@ -59,6 +122,18 @@ class ExplorerVisualization extends React.Component {
         } else {
           summaries.push(dataItem);
         }
+        break;
+      }
+      case 'stackedDateBar': {
+        const { secondaryKey, title } = chartConfig[`${field}`];
+        const dataItem = {
+          type: 'stackedBar',
+          title,
+          xAxisFieldName: field,
+          yAxisFieldName: secondaryKey,
+          data: this.createStackedBarData(this.props.rawData, field, secondaryKey),
+        };
+        stackedBarCharts.push(dataItem);
         break;
       }
       default:
@@ -181,6 +256,8 @@ class ExplorerVisualization extends React.Component {
                     {
                       <PercentageStackedBarChart
                         key={i}
+                        secondaryKey={'date'}
+                        primaryKey={chart.yAxisFieldName}
                         data={chart.data}
                         title={chart.title}
                         lockMessage={lockMessage}

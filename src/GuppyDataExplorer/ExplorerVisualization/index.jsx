@@ -71,16 +71,15 @@ class ExplorerVisualization extends React.Component {
         }
       }
     });
-    console.log(hashTable)
 
     // flatten the hash table to have a unique primaryKey/ secondaryKey pairing per row
     const mappedData = [];
-    Object.keys(hashTable).forEach((date) => {
-      const variants = hashTable[date];
+    Object.keys(hashTable).forEach((primaryKeyVal) => {
+      const variants = hashTable[primaryKeyVal];
       Object.keys(variants).forEach((variant) => {
         const itemData = {};
-        itemData.date = date;
-        itemData.name = variant;
+        itemData[primaryKey] = primaryKeyVal;
+        itemData[secondaryKey] = variant;
         itemData.value = variants[variant];
         mappedData.push(itemData);
       });
@@ -256,7 +255,7 @@ class ExplorerVisualization extends React.Component {
                     {
                       <PercentageStackedBarChart
                         key={i}
-                        secondaryKey={'date'}
+                        secondaryKey={chart.xAxisFieldName}
                         primaryKey={chart.yAxisFieldName}
                         data={chart.data}
                         title={chart.title}

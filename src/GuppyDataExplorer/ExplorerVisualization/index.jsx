@@ -78,13 +78,21 @@ class ExplorerVisualization extends React.Component {
       const variants = hashTable[primaryKeyVal];
       Object.keys(variants).forEach((variant) => {
         const itemData = {};
+        //const newDateVal = mwwr.convert(primaryKeyVal);
+        //itemData[primaryKey] = newDateVal;
         itemData[primaryKey] = primaryKeyVal;
         itemData[secondaryKey] = variant;
         itemData.value = variants[variant];
         mappedData.push(itemData);
       });
     });
-    console.log(mappedData)
+
+    // mappedData.sort((a, b) => {
+    //   const aDate = new Date(a[primaryKey]);
+    //   const bDate = new Date(b[primaryKey]);
+    //   return aDate.date - bDate.date;
+    // });
+
     return mappedData;
   }
 

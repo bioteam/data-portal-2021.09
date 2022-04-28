@@ -99,6 +99,21 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
     */
   let cache = {};
 
+  const fetchDBGapNumByProjID = promiseMemoize((projID) => {
+    return fetchWithCreds({
+      path: `${apiPath}v0/submission/graphql/`,
+      method: "POST",
+      body: JSON.stringify({
+        query: `query {
+            project(project_id: "${projID}", first: 1) {
+              dbgap_accession_number
+            }
+          }`,
+        variables: null
+      })
+    });
+  }, cache);
+
   const fetchCaseForSubmitterIDGen = promiseMemoize((projID) => {
     return fetchWithCreds({
       path: `${apiPath}v0/submission/graphql/`,
@@ -126,18 +141,31 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
     
       // only for case nodes
       if ( fileParsedJSON["type"] === "case" ) {
-      
           const projID = `${program}-${project}`;
+
+          // Fetch dbGapNum in case the case doesn't exist
+          const dbGapNum = await fetchDBGapNumByProjID(projID).then(({ status, data }) => {
+            switch (status) {
+              case 200:
+                return data.data.project[0].dbgap_accession_number;
+              default:
+                throw new Error("non-200 response from server")
+              }
+          });
 
           fileParsedJSON.submitter_id = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
             switch (status) {
             case 200:
-              const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + 1;
+              // No case exists
+              if ( data.data.case === undefined ) {
+                return `${dbGapNum}0001`;
+              } else {
+                const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + 1;
+                const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
 
-              const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
-
-              // padding
-              return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+                // padding
+                return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+              }
             default:
               return fileParsedJSON.submitter_id;
             }
@@ -181,16 +209,31 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
         if ( !inxMap[projID] ) inxMap[projID] = 1;
     
         if ( newID === "" ) {
+          // Fetch dbGapNum in case the case doesn't exist
+          const dbGapNum = await fetchDBGapNumByProjID(projID).then(({ status, data }) => {
+            switch (status) {
+              case 200:
+                return data.data.project[0].dbgap_accession_number;
+              default:
+                throw new Error("non-200 response from server")
+              }
+          });
+
           newID = await fetchCaseForSubmitterIDGen(projID).then(({ status, data }) => {
             switch (status) {
             case 200:
-              const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
-              inxMap[projID] += 1;
-    
-              const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
-    
-              // padding
-              return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+              // No case exists
+              if ( data.data.case === undefined ) {
+                return `${dbGapNum}0001`;
+              } else {
+                const lastFourInt = parseInt(data.data.case[0].submitter_id.slice(-4), 10) + inxMap[projID];
+                inxMap[projID] += 1;
+      
+                const dbGapNumPrefix = data.data.case[0].projects[0].dbgap_accession_number;
+      
+                // padding
+                return `${dbGapNumPrefix}${("0000" + lastFourInt).slice(-4)}`;
+              }
             default:
               return row.submitter_id;
             }

@@ -98,6 +98,7 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
     submit
     */
   let cache = {};
+  let cacheProj = {};
 
   const fetchDBGapNumByProjID = promiseMemoize((projID) => {
     return fetchWithCreds({
@@ -112,7 +113,7 @@ const submitToServer = (fullProject, methodIn = 'PUT') => async (dispatch, getSt
         variables: null
       })
     });
-  }, cache);
+  }, cacheProj);
 
   const fetchCaseForSubmitterIDGen = promiseMemoize((projID) => {
     return fetchWithCreds({

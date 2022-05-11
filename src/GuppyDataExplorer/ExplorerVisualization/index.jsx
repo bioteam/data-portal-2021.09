@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import date from 'date-and-time'
 import GuppyWrapper from '@gen3/guppy/dist/components/GuppyWrapper';
 import ConnectedFilter from '@gen3/guppy/dist/components/ConnectedFilter';
 import SummaryChartGroup from '@gen3/ui-component/dist/components/charts/SummaryChartGroup';
@@ -79,8 +78,7 @@ class ExplorerVisualization extends React.Component {
       const variants = hashTable[primaryKeyVal];
       Object.keys(variants).forEach((variant) => {
         const itemData = {};
-        const newDateVal = date.transform(primaryKeyVal, 'YYYY-MM-DD', 'MM-YYYY');
-        itemData[primaryKey] = newDateVal;
+        itemData[primaryKey] = primaryKeyVal;
         itemData[secondaryKey] = variant;
         itemData.value = variants[variant];
         mappedData.push(itemData);
@@ -92,6 +90,7 @@ class ExplorerVisualization extends React.Component {
       const bDate = b[primaryKey].split('-');
       return aDate[1] - bDate[1] || aDate[0] - bDate[0];
     });
+    console.log(mappedData);
     return mappedData;
   }
 
@@ -131,13 +130,13 @@ class ExplorerVisualization extends React.Component {
         break;
       }
       case 'stackedDateBar': {
-        const { secondaryKey, title } = chartConfig[`${field}`];
+        const { primaryKey, secondaryKey, title } = chartConfig[`${field}`];
         const dataItem = {
           type: 'stackedBar',
           title,
-          xAxisFieldName: field,
+          xAxisFieldName: primaryKey,
           yAxisFieldName: secondaryKey,
-          data: this.createStackedBarData(this.props.rawData, field, secondaryKey),
+          data: this.createStackedBarData(this.props.rawData, primaryKey, secondaryKey),
         };
         stackedBarCharts.push(dataItem);
         break;
